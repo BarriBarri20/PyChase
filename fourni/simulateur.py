@@ -1,4 +1,5 @@
 import os
+
 import time
 from PIL import ImageTk as itk
 from tkinter import Tk, Canvas, Label, Menu, PhotoImage, Toplevel, Button, LEFT, ALL, StringVar, Entry, messagebox
@@ -7,7 +8,7 @@ import pyChase
 
 LEVEL_FOLDER_PATH: str = os.path.abspath("./niveaux")
 SCORE_FILE_PATH: str = os.path.abspath("./scores/scores.txt")
-temps_niveau = 70
+temps_niveau = 59
 
 
 class Jeu:
@@ -16,7 +17,7 @@ class Jeu:
         self.started: bool = False
         self.score_start: bool = False
         self.niveau_en_cours: int = None
-        self.temps_initial: float = 15
+        self.temps_initial: float = temps_niveau
         self.fenetre = None
         self.gauche_presse = False
         self.droite_presse = False
@@ -48,7 +49,7 @@ class Jeu:
         self.started: bool = False
         self.score_start: bool = False
         self.niveau_en_cours: int = None
-        self.temps_initial: float = 15
+        self.temps_initial: float = temps_niveau
 
 
 def quitter(fenetre: Tk):
@@ -107,12 +108,12 @@ def charger_niveau(jeu: Jeu, path: str):
     jeu.niveau_en_cours = int(tmp_str.replace(".txt", ""))
     jeu.started = True
     jeu.stop = False
-    jeu.temps_initial = 15
+    jeu.temps_initial = temps_niveau
 
     if not jeu.t.is_alive():
         jeu.t.start()
     else:
-        jeu.temps_niveau = 15
+        jeu.temps_niveau = temps_niveau
 
     refresh_score(jeu)
 
@@ -295,7 +296,8 @@ def simulate():
     my_string_var = StringVar(value="")
     time_label: Label = Label(fenetre, anchor="nw", font="Cooper", justify="left", bg="#d8c09e", fg="black",
                               textvariable=my_string_var, height=3, width=17)
-    time_label.config(font=("Impact", 30))
+
+    time_label.config(font=("Impact", 30))  # fonte change this to change the font
     time_label.pack()
     score_label: Label = Label(fenetre, anchor="nw", font="Cooper", justify="left", bg="#d8c09e", fg="black",
                                text=load_scores(jeu), height=13, width=38)

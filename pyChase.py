@@ -1,3 +1,4 @@
+from bisect import bisect_right
 from fourni import simulateur, pathfinder
 from outils import \
     creer_image, \
@@ -19,7 +20,6 @@ def jeu_en_cours(_joueur, _temps_restant) -> str:
     """
     
     if _temps_restant <= 0:
-        print("fini")
         return "fini"
     for jouer in _joueur:
         if jouer.mort:
@@ -76,20 +76,18 @@ def avancer_minotaure(_minotaures: list, _joueur: list, _murs: list, _carte: lis
         :param _can: Canvas (ignorez son fonctionnement), utile uniquement pour créer_image()
         :param _liste_image : Liste contenant les références sur les images
     """
-    print("Avancer minotaure")
     for minotaure in _minotaures:
-        chemin = pathfinder.search(_murs, _carte, cost=1, start=(minotaure.x, minotaure.y), end=(_joueur[0].x, _joueur[0].y))
-        for step in range(NIVEAU_DIFFICULTE+1):
+        chemin = pathfinder.search(_murs, _carte, cost=1, start=(minotaure.x, minotaure.y), end=(_joueur[0].x, _joueur[0].y)) # Recherche du chemin
+        for step in range(NIVEAU_DIFFICULTE+1): # On avance de NIVEAU_DIFFICULTE cases
             for i in range(len(chemin)):
-                for j in range(len(chemin[i])):
+                for j in range(len(chemin[i])): # On parcourt le chemin
                     if step == chemin[i][j]:
                         creer_image(_can, minotaure.x, minotaure.y, _liste_image[4])
                         minotaure.x = j
                         minotaure.y = i
                         creer_image(_can, minotaure.x, minotaure.y, _liste_image[2])
-                    if _joueur[0].x == minotaure.x and _joueur[0].y == minotaure.y:
+                    if _joueur[0].x == minotaure.x and _joueur[0].y == minotaure.y: # Si le joueur est sur la même case que le minotaure
                         _joueur[0].mort = True
-                        creer_image(_can, _joueur[0].x, _joueur[0].y, _liste_image[4])
                         creer_image(_can, _joueur[0].x, _joueur[0].y, _liste_image[3])
 
 
@@ -113,7 +111,6 @@ def definir_mouvement(_direction: str, _can, _joueur: list, _murs: list, _minota
                 effectuer_mouvement(coordonnee_destination, _minotaures, _murs, _joueur, _sorties, _carte, _can, _liste_image, coordonnee_x(coordonnee_destination), coordonnee_y(coordonnee_destination))
             except:
                 print("Erreur")
-            print("Droite")
 
         elif _direction == "gauche":
             coordonnee_destination = creer_case_vide(coordonnee_x(jouer)-1, coordonnee_y(jouer))
@@ -121,21 +118,21 @@ def definir_mouvement(_direction: str, _can, _joueur: list, _murs: list, _minota
                 effectuer_mouvement(coordonnee_destination, _minotaures, _murs, _joueur, _sorties, _carte, _can, _liste_image, coordonnee_x(coordonnee_destination), coordonnee_y(coordonnee_destination))
             except:
                 print('Erreur')
-            print("Gauche")
+        
         elif _direction == "haut":
             coordonnee_destination = creer_case_vide(coordonnee_x(jouer), coordonnee_y(jouer) - 1)
             try:
                 effectuer_mouvement(coordonnee_destination, _minotaures, _murs, _joueur, _sorties, _carte, _can, _liste_image, coordonnee_x(coordonnee_destination), coordonnee_y(coordonnee_destination))
             except:
                 print('Erreur')
-            print("Haut")
+
         elif _direction == "bas":
             coordonnee_destination = creer_case_vide(coordonnee_x(jouer), coordonnee_y(jouer) + 1)
             try:
                 effectuer_mouvement(coordonnee_destination, _minotaures, _murs, _joueur, _sorties, _carte, _can, _liste_image, coordonnee_x(coordonnee_destination), coordonnee_y(coordonnee_destination))
             except:
                 print('Erreur')
-            print("Bas")
+
 
 def effectuer_mouvement(_coordonnee_destination, _minotaures: list, _murs: list, _joueur: list, _sorties: list, _carte: list, _can,
                         _liste_image: list, _deplace_joueur_x: int, _deplace_joueur_y: int):
@@ -157,28 +154,32 @@ def effectuer_mouvement(_coordonnee_destination, _minotaures: list, _murs: list,
     """
     for jouer in _joueur:
         for mur in _murs:
-            if _deplace_joueur_x == coordonnee_x(mur) and _deplace_joueur_y == coordonnee_y(mur):
+            if _deplace_joueur_x == coordonnee_x(mur) and _deplace_joueur_y == coordonnee_y(mur): # Si le joueur est sur un mur
                 avancer_minotaure(_minotaures, _joueur, _murs, _carte, _can, _liste_image)
                 return
         for minotaure in _minotaures:
-            if _deplace_joueur_x == coordonnee_x(minotaure) and _deplace_joueur_y == coordonnee_y(minotaure):
-                jouer.mort = True
+            if _deplace_joueur_x == coordonnee_x(minotaure) and _deplace_joueur_y == coordonnee_y(minotaure): # Si le joueur est sur un minotaure
+                creer_image(_can, jouer.x, jouer.y, _liste_image[4])
+                jouer.x = _deplace_joueur_x
+                jouer.y = _deplace_joueur_y
+                creer_image(_can, jouer.x, jouer.y, _liste_image[2])
+                _joueur[0].mort = True
                 return
                 
         for sortie in _sorties:
-            if _deplace_joueur_x == coordonnee_x(sortie) and _deplace_joueur_y == coordonnee_y(sortie):
+            if _deplace_joueur_x == coordonnee_x(sortie) and _deplace_joueur_y == coordonnee_y(sortie): #Si le joueur est sur une sortie
                 creer_image(_can, jouer.x, jouer.y, _liste_image[4])
                 jouer.x = _deplace_joueur_x
                 jouer.y = _deplace_joueur_y
                 creer_image(_can, jouer.x, jouer.y, _liste_image[4])
-                jouer.fini = True
-                jouer.gagne = True
+                jouer.fini = True #On change le statut du joueur
+                jouer.gagne = True #On change le statut du joueur
                 return
         
-        creer_image(_can, jouer.x, jouer.y, _liste_image[4])
-        jouer.x = _deplace_joueur_x
-        jouer.y = _deplace_joueur_y
-        creer_image(_can, jouer.x, jouer.y, _liste_image[3])
+        creer_image(_can, jouer.x, jouer.y, _liste_image[4]) #On efface le joueur de sa position actuelle
+        jouer.x = _deplace_joueur_x #On change les coordonnées du joueur
+        jouer.y = _deplace_joueur_y #On change les coordonnées du joueur
+        creer_image(_can, jouer.x, jouer.y, _liste_image[3]) #On affiche le joueur à sa nouvelle position
 
 
 
@@ -190,12 +191,12 @@ def chargement_score(_scores_file_path: str, _dict_scores: dict):
     :return:
     """
     with open(_scores_file_path, "r") as fichier:
-        lignes = fichier.readlines()
+        lignes = fichier.read().splitlines()
     for i in range(len(lignes)):
-        scores = lignes[i].strip().split(";")[1:][:-1]
-        print(scores[:-1])
+        ligne = lignes[i].strip().split(";")
+        scores = ligne[1:]
         list_scores = [float(j) for j in scores] # On récupère les scores
-        _dict_scores[int(lignes[i].replace("\n", "").split(";")[0])] = list_scores
+        _dict_scores[int(ligne[0])] = list_scores
 
 
 def maj_score(_niveau_en_cours: int, _dict_scores: dict) -> str:
@@ -224,8 +225,21 @@ def calcule_score(_temps_initial: float, _temps_restant: float) -> float:
     :param _temps_initial: debut du jeu
     :return: le score du joueur
     """
-    return round(_temps_initial - _temps_restant, 2)
+    return round(_temps_initial - _temps_restant, 2) # On arrondit à 2 chiffres après la virgule
 
+
+def update_scores(_liste_scores: list, _score: float) -> list:
+    """
+    Fonction mettant à jour la liste des scores en insérant le nouveau score à sa place
+    dans la liste.
+    :param _liste_scores: la liste des scores
+    :param _score: le nouveau score
+    :return: la liste des scores mise à jour
+    """
+    _liste_scores.append(_score)
+    _liste_scores.sort()
+    _liste_scores.sort(key= lambda x: x==0)
+    return _liste_scores[:10]
 
 def enregistre_score(_temps_niveau: float, _temps_initial: float, _dict_scores: dict, _niveau_en_cours: int):
     """
@@ -236,10 +250,9 @@ def enregistre_score(_temps_niveau: float, _temps_initial: float, _dict_scores: 
     :param _niveau_en_cours: Le numéro du niveau en cours
     """
     score = calcule_score(_temps_initial, _temps_niveau)
-    if _niveau_en_cours not in _dict_scores.keys():
-        _dict_scores[_niveau_en_cours] = [score]
-    else:
-        _dict_scores[_niveau_en_cours].append(score)
+    if _niveau_en_cours in _dict_scores:
+        _dict_scores[_niveau_en_cours] = update_scores(_dict_scores[_niveau_en_cours], score)
+
 
 def update_score_file(_scores_file_path: str, _dict_scores: dict):
     """
@@ -249,7 +262,11 @@ def update_score_file(_scores_file_path: str, _dict_scores: dict):
     """
     with open(_scores_file_path, "w") as fichier:
         for i in _dict_scores.keys():
-            print(i)
+            fichier.write(f"{i};")
+            for j in range(len(_dict_scores[i])-1):
+                fichier.write(f"{_dict_scores[i][j]};")
+            fichier.write(f"{_dict_scores[i][-1]}")
+            fichier.write("\n")
 
 
 if __name__ == '__main__':
