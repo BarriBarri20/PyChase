@@ -1,0 +1,13 @@
+MouseInfo == 0.1.3
+Pillow
+PyAutoGUI == 0.9.52
+PyGetWindow == 0.0.8
+PyMsgBox== 1.0.8
+PyRect
+PyScreeze
+PyTweening
+keyboard
+numpy
+pynput
+pyperclip == 1.8.0
+six
